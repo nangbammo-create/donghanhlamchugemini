@@ -217,6 +217,9 @@ table.tbl tr:hover td{background:#f7fbf9}
 .learn-side .sdot{background:rgba(255,255,255,.2);color:#fff}
 .learn-side .sbai{color:#bfe0f2}
 .learn-side .smeta{color:#a9cfe6}
+html{scroll-behavior:smooth}
+#toTop{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:200;width:46px;height:46px;border-radius:50%;border:none;background:var(--cta);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.28);display:none;align-items:center;justify-content:center}
+#toTop.show{display:flex}
 </style>
 </head>
 <body>
@@ -870,6 +873,9 @@ window.App=App;
 
 /* ================= INIT ================= */
 document.body.insertAdjacentHTML('beforeend','<div class="modal" id="modal" onclick="if(event.target===this)App.closeModal()"><div class="box" id="modalBox"></div></div>');
+document.body.insertAdjacentHTML('beforeend','<button id="toTop" title="V\u1ec1 \u0111\u1ea7u trang">\u2191</button>');
+$('toTop').onclick=function(){window.scrollTo(0,0)};
+window.addEventListener('scroll',function(){var b=$('toTop');if(b)b.classList.toggle('show',window.scrollY>400)},{passive:true});
 render();
 </script>
 </body>
