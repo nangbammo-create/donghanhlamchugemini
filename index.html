@@ -27,7 +27,7 @@ body.fullw .topbar .wrap{max-width:1560px}
 .topsocial .soc:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.3)}
 .topsocial .hotline{display:inline-flex;align-items:center;gap:5px;background:#fff;color:#0068FF;font-weight:800;font-size:12.5px;padding:6px 13px;border-radius:99px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.2s;white-space:nowrap}
 .topsocial .hotline:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.3)}
-@media(max-width:760px){.topsocial .tsup{display:none}.brand{font-size:13px}.topright{gap:8px}.topsocial{gap:5px}.topsocial .soc{width:24px;height:24px;font-size:11px}.topsocial .hotline{font-size:11px;padding:5px 9px}}
+@media(max-width:760px){.topbar .wrap{flex-wrap:wrap;row-gap:10px}.brand{white-space:normal;flex:1 1 100%;font-size:14px}.topright{flex:1 1 100%;flex-wrap:wrap;row-gap:8px}.topsocial .tsup{display:none}.topsocial{gap:5px}.topsocial .soc{width:24px;height:24px;font-size:11px}.topsocial .hotline{font-size:11px;padding:5px 9px}}
 .brand{font-weight:800;font-size:17px;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
 .brand small{display:block;font-weight:500;font-size:11px;opacity:.9}
 .topbtn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;font-weight:600}
@@ -181,7 +181,7 @@ table.tbl tr:hover td{background:#f7fbf9}
 .slesson.locked .sdot{background:#e7f0eb;color:#9aa6a0}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(16px);background:#14342a;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;opacity:0;transition:.25s;z-index:200;max-width:92%;text-align:center;pointer-events:none}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(max-width:1150px){.home2{grid-template-columns:1fr;gap:26px}.hprof{position:static}.learn{grid-template-columns:1fr;gap:26px}.learn-video{order:1}.learn-main{order:2}.learn-side{order:3;position:static}}
+@media(max-width:1150px){.learn.noguide{grid-template-columns:1fr}.home2{grid-template-columns:1fr;gap:26px}.hprof{position:static}.learn{grid-template-columns:1fr;gap:26px}.learn-video{order:1}.learn-main{order:2}.learn-side{order:3;position:static}}
 @media(max-width:560px){.hero h1{font-size:20px}.lnav{flex-direction:column}}
 
 /* Vien gradient xanh luc bao -> xanh la dam cho tat ca cac o */
@@ -419,6 +419,7 @@ function modStats(mid,uid){const m=getContent().modules.find(x=>x.id===mid);if(!
 function modMinutes(m){return m.lessons.reduce((a,l)=>a+(+l.minutes||0),0)}
 function firstIncomplete(uid){const d=doneSet(uid);for(const m of getContent().modules){for(const l of m.lessons){if(!d[l.id])return{mid:m.id,lid:l.id,m:m,l:l}}}return null}
 function firstOpenLesson(mid,uid){const d=doneSet(uid);const m=getContent().modules.find(x=>x.id===mid);if(!m||!m.lessons||!m.lessons.length)return null;for(const l of m.lessons){if(!d[l.id])return l}return m.lessons[0]}
+function isMobileView(){try{return window.matchMedia('(max-width:1150px)').matches}catch(e){return false}}
 function findLesson(mid,lid){const m=getContent().modules.find(x=>x.id===mid);if(!m)return null;const l=m.lessons.find(x=>x.id===lid);return l?{m:m,l:l}:null}
 function lessonNav(mid,lid){const all=allLessons();const ix=all.findIndex(x=>x.lid===lid);const g=k=>{if(k<0||k>=all.length)return null;const a=all[k];const t=findLesson(a.mid,a.lid);return{mid:a.mid,id:a.lid,title:t.l.title}};return{prev:g(ix-1),next:g(ix+1)}}
 
@@ -524,7 +525,7 @@ function vHome(){const s=sessGet();const u=getUsers().find(x=>x.id===s.uid)||{na
   '<div class="grid">'+cards+'</div></div></div></div>'}
 function vModule(mid){const s=sessGet();const m=getContent().modules.find(x=>x.id===mid);if(!m){nav('home');return}
   const d=doneSet(s.uid);const ms=modStats(mid,s.uid);
-  const items=m.lessons.map((l,i)=>'<div class="lesson'+(d[l.id]?' done':'')+'" onclick="App.nav(\'lesson\',{mid:\''+mid+'\',lid:\''+l.id+'\'})">'+
+  const items=m.lessons.map((l,i)=>'<div class="lesson'+(d[l.id]?' done':'')+'" onclick="App.tryLesson(\''+mid+'\',\''+l.id+'\')">'+
     '<div class="st">'+(d[l.id]?'✓':(i+1))+'</div><div class="t"><b>'+esc(l.title)+(l.video?'<span class="vidbadge">\U0001f39c video</span>':'')+'</b><span>⏱ '+l.minutes+' phút '+(d[l.id]?'· đã hoàn thành':'')+'</span></div><div style="color:var(--teal);font-weight:800">›</div></div>').join('');
   $('app').innerHTML='<div class="wrap"><span class="backlink" onclick="App.nav(\'home\')">← Tất cả module</span>'+
   '<div class="card"><h3><span style="background:var(--grad);color:#fff;border-radius:8px;padding:2px 10px;font-size:14px;margin-right:8px">'+m.num+'</span>'+esc(m.title)+'</h3>'+
@@ -544,7 +545,7 @@ function vLesson(mid,lid){const s=sessGet();const f=findLesson(mid,lid);if(!f){n
   const tk=lessonTasks(f.l);
   const checks=((getChecks()[s.uid]||{})[lid])||{};
   const allOk=tk.items.length===0||tk.items.every((_,i)=>checks[i]);
-  const col2='<span class="backlink" style="margin-top:0" onclick="App.nav(\'home\')">\u2190 L\u1ed9 tr\u00ecnh h\u1ecdc</span>'+
+  const col2='<span class="backlink" style="margin-top:0" onclick="App.backFromLesson(\''+mid+'\')">'+(isMobileView()?'\u2190 Danh s\u00e1ch b\u00e0i h\u1ecdc':'\u2190 L\u1ed9 tr\u00ecnh h\u1ecdc')+'</span>'+
   videoHTML(f.l.video,true)+
   '<div class="lsec">PH\u1ea6N '+f.m.num+': '+esc(f.m.title)+'</div>'+
   '<h2 class="ltitle">'+esc(f.l.title)+'</h2>'+
@@ -697,7 +698,9 @@ toggleDone(mid,lid){const s=sessGet();if(!s||s.role!=='student')return;const p=g
   if(up[lid])delete up[lid];else up[lid]=Date.now();p[s.uid]=up;saveProg(p);render()},
 checkTask(mid,lid,idx,val){const s=sessGet();const c=getChecks();const u=c[s.uid]||{};const o=u[lid]||{};if(val)o[idx]=1;else delete o[idx];u[lid]=o;c[s.uid]=u;saveChecks(c);const f=findLesson(mid,lid);const tk=lessonTasks(f.l);const box=$('taskList');if(box)box.innerHTML=taskListHTML(tk,o,mid,lid);App.refreshDone(mid,lid);},
 refreshDone(mid,lid){const s=sessGet();const f=findLesson(mid,lid);if(!f||!s)return;const tk=lessonTasks(f.l);const isdone=!!doneSet(s.uid)[lid];const o=((getChecks()[s.uid]||{})[lid])||{};const allOk=tk.items.length===0||tk.items.every((_,i)=>o[i]);const btn=$('doneBtn');if(btn)btn.disabled=!isdone&&tk.items.length>0&&!allOk;const note=$('taskNote');if(note&&tk.items.length>0)note.innerHTML=allOk?'✅ Đã xong checklist — bạn có thể đánh dấu hoàn thành bài học.':'⬜ Tick đủ việc để mở nút "Đánh dấu hoàn thành".';},
-openModule(mid){const s=sessGet();const l=firstOpenLesson(mid,s?s.uid:null);if(l)nav('lesson',{mid:mid,lid:l.id});else nav('home')},
+openModule(mid){const s=sessGet();if(isMobileView()){nav('module',{mid:mid});return}
+const l=firstOpenLesson(mid,s?s.uid:null);if(l)nav('lesson',{mid:mid,lid:l.id});else nav('home')},
+backFromLesson(mid){if(isMobileView())nav('module',{mid:mid});else nav('home')},
 tryLesson(mid,lid){const s=sessGet();if(lessonUnlocked(s.uid,lid))nav('lesson',{mid:mid,lid:lid});else toast('🔒 Hãy hoàn thành bài học trước đó để mở khóa bài này.');},
 changePw(){const s=sessGet();const users=getUsers();const u=users.find(x=>x.id===s.uid);
   const o=$('pwOld').value,n1=$('pwNew').value,n2=$('pwNew2').value;
